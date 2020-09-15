@@ -9,6 +9,8 @@ let Application = PIXI.Application,
 let logo,
     oldMouseX, oldMouseY, mouseX, mouseY;
 
+let justLoaded = true;
+
 let orbitCenter, posGraph;
 let orbitDeg = 225;
 let planet01Deg = 45;
@@ -126,7 +128,6 @@ $(document).ready(function () {
             { name: "grid", url: "/images/grid.png" },
             { name: "grid_o", url: "/images/grid_overlay.png" },
             { name: "logo", url: "/images/logo_ak.png" },
-            { name: "text_blog", url: "/images/text_blog.png" },
         ])
         .load(setup);
 
@@ -246,6 +247,7 @@ $(document).ready(function () {
             text_twitter = new PIXI.Text('Twitter', style);
             text_about = new PIXI.Text('2020|Abe', styleSmall);
             text_title = new PIXI.Text('Abe\'s Pfolio: \n caution! \n experiments ahead..', styleMessage);
+            text_info = new PIXI.Text('use scroll up/down', styleMessage);
 
             if (app.screen.width > 700) {
                 text_title.position.set(app.screen.width / 2 - 350, app.screen.height / 2 - 90);
@@ -253,6 +255,12 @@ $(document).ready(function () {
             } else {
                 text_title.position.set(app.screen.width / 2 - 90, app.screen.height / 2 - 350);
                 app.stage.addChild(text_title);
+            }
+
+            if (justLoaded) {
+                text_info.anchor.set(0.5);
+                text_info.position.set(app.screen.width / 2, app.screen.height / 2 - 150);
+                app.stage.addChild(text_info);
             }
 
             text_about.anchor.set(0.5);
@@ -347,6 +355,11 @@ $(document).ready(function () {
         }
 
         $(document).on('mousewheel', function (event) {
+            if (justLoaded) {
+                justLoaded = false;
+                app.stage.removeChild(text_info);
+            }
+
             if (event.deltaY == 1) {
                 text_blogs_deg >= 360 ? text_blogs_deg = 0 : text_blogs_deg += rotationRate;
                 text_dusun_deg >= 360 ? text_dusun_deg = 0 : text_dusun_deg += rotationRate;
@@ -408,7 +421,7 @@ $(document).ready(function () {
         }
 
         function gotoBlogs() {
-            var win = window.open('http://abraham-kurnanto.com/website', '_blank');
+            var win = window.open('http://abraham-kurnanto.com/website/public', '_blank');
             if (win) {
                 win.focus();
             } else {
