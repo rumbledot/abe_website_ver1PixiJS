@@ -1,0 +1,10 @@
+IKnowParentContainer.removeChild(thisSmallThingy);
+
+but sometimes you dont remember where did you put it!
+
+myContainer.parent.removeChild(myContainer);
+
+and sometimes you know that it wont be used anymore AT ALL. Then if all Text and Sprites elements doesnt have textures that you will use in future, you can destroy all textures inside
+
+myContainer.parent.removeChild(myContainer);
+myContainer.destroy({children:true, texture:true, baseTexture:true});
