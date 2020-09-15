@@ -9,16 +9,39 @@ let Application = PIXI.Application,
 let logo,
     oldMouseX, oldMouseY, mouseX, mouseY;
 
-let text_blogs, text_dusun, text_profile, text_about;
+let orbitCenter, posGraph;
+let orbitDeg = 225;
+let planet01Deg = 45;
+let planet02Deg = 120;
+let planet03Deg = 160;
+let planet04Deg = 180;
+
+let text_blogs, text_dusun, text_git, text_twitter, text_about, text_title, oldText;
 
 let text_blogs_deg = 360;
 let text_dusun_deg = 90;
-let text_profile_deg = 180;
+let text_git_deg = 180;
 let text_about_deg = 270;
 let rotationRate = 20;
 
-let distance = 200;
+let distance = 240;
 let dragging = false;
+
+let orbit = new PIXI.Graphics();
+let elipse01 = new PIXI.Graphics();
+let elipse02 = new PIXI.Graphics();
+let planet01 = new PIXI.Graphics();
+let planet02 = new PIXI.Graphics();
+let planet03 = new PIXI.Graphics();
+let planet04 = new PIXI.Graphics();
+
+let sp_orbit = new Sprite();
+let sp_elipse01 = new Sprite();
+let sp_elipse02 = new Sprite();
+let sp_planet01 = new Sprite();
+let sp_planet02 = new Sprite();
+let sp_planet03 = new Sprite();
+let sp_planet04 = new Sprite();
 
 $(document).ready(function () {
 
@@ -49,23 +72,41 @@ $(document).ready(function () {
     });
     app.stage.addChild(grid_overlays);
 
+    const circleLayer = new PIXI.Container();
+    app.stage.addChild(circleLayer);
+
     const style = new PIXI.TextStyle({
-        fontFamily: 'Calibri Light',
+        fontFamily: 'Courier New',
         fontSize: 70,
         fill: ['#ffffff'],
         stroke: '#9badb7',
         strokeThickness: 2,
-        dropShadow: false,
-        dropShadowColor: '#000000',
-        dropShadowBlur: 4,
-        dropShadowAngle: Math.PI / 6,
-        dropShadowDistance: 6,
         wordWrap: true,
         wordWrapWidth: 440,
     });
 
+    const styleMessage = new PIXI.TextStyle({
+        fontFamily: 'Courier New',
+        fontSize: 30,
+        fill: ['#000000'],
+        stroke: '#9badb7',
+        strokeThickness: 1,
+        wordWrap: true,
+        wordWrapWidth: 200,
+    });
+
+    const styleSmall = new PIXI.TextStyle({
+        fontFamily: 'Courier New',
+        fontSize: 20,
+        fill: ['#000000'],
+        stroke: '#9badb7',
+        strokeThickness: 1,
+        wordWrap: true,
+        wordWrapWidth: 200,
+    });
+
     const styleOver = new PIXI.TextStyle({
-        fontFamily: 'Calibri Light',
+        fontFamily: 'Tahoma',
         fontSize: 70,
         fill: ['#000000'],
         stroke: '#9badb7',
@@ -100,27 +141,123 @@ $(document).ready(function () {
         function resize() {
             app.renderer.resize(window.innerWidth, window.innerHeight);
             setGrid();
-
-            let circle01 = new PIXI.Graphics();
-            circle01.lineStyle(2, 0xf6f6f6, 1);
-            circle01.drawCircle(app.screen.width / 2, app.screen.height / 2, 200);
-            app.stage.addChild(circle01);
-
-            let circle02 = new PIXI.Graphics();
-            circle02.lineStyle(2, 0xddf2f6, 1);
-            circle02.drawCircle(app.screen.width / 2, app.screen.height / 2, 90);
-            circle02.pivot.x = 70;
-            circle02.pivot.y = 70;
-            circle02.rotate = 0.8;
-            app.stage.addChild(circle02);
-
+            planets();
             centerLogo();
+            menuTexts();
+        }
 
+        app.ticker.add(function (delta) {
+            orbitDeg += 0.5;
+            planet01Deg += 0.2;
+            planet02Deg += 0.5;
+            planet03Deg += 0.6;
+            planet04Deg += 0.8;
+            animatePlanets();
+        });
+
+        function planets() {
+            app.stage.removeChild(circleLayer);
+            app.stage.addChild(circleLayer);
+
+            elipse01.lineStyle(2, 0xf6f6f6, 1);
+            elipse01.drawEllipse(0, 0, 200, 100);
+            elipse01.pivot.x = 0;
+            elipse01.pivot.y = 0;
+            sp_elipse01.addChild(elipse01);
+            sp_elipse01.anchor.set(0.5);
+            posText = getRadPosition(app.screen.width / 2, app.screen.height / 2, 0, distance);
+            sp_elipse01.position.set(posText.x, posText.y);
+            circleLayer.addChild(sp_elipse01);
+
+            elipse02.lineStyle(2, 0xf6f6f6, 1);
+            elipse02.drawEllipse(0, 0, 150, 80);
+            elipse02.pivot.x = 0;
+            elipse02.pivot.y = 0;
+            sp_elipse02.addChild(elipse02);
+            sp_elipse02.anchor.set(0.5);
+            posText = getRadPosition(app.screen.width / 2, app.screen.height / 2, 0, distance);
+            sp_elipse02.position.set(posText.x, posText.y);
+            circleLayer.addChild(sp_elipse02);
+
+            orbit.lineStyle(2, 0xf6f6f6, 1);
+            orbit.drawCircle(0, 0, 200);
+            orbit.pivot.x = 50;
+            orbit.pivot.y = 50;
+            sp_orbit.addChild(orbit);
+            sp_orbit.anchor.set(0.5);
+            circleLayer.addChild(sp_orbit);
+
+            planet01.lineStyle(2, 0xf6f6f6, 1);
+            planet01.drawCircle(0, 0, 90);
+            planet01.pivot.x = 50;
+            planet01.pivot.y = 50;
+            sp_planet01.addChild(planet01);
+            sp_planet01.anchor.set(0.5);
+            circleLayer.addChild(sp_planet01);
+
+            planet02.lineStyle(2, 0xf6f6f6, 1);
+            planet02.drawCircle(0, 0, 60);
+            planet02.pivot.x = 50;
+            planet02.pivot.y = 50;
+            sp_planet02.addChild(planet02);
+            sp_planet02.anchor.set(0.5);
+            circleLayer.addChild(sp_planet02);
+
+            planet03.lineStyle(2, 0xf6f6f6, 1);
+            planet03.drawCircle(0, 0, 30);
+            planet03.pivot.x = 50;
+            planet03.pivot.y = 50;
+            sp_planet03.addChild(planet03);
+            sp_planet03.anchor.set(0.5);
+            circleLayer.addChild(sp_planet03);
+
+            planet04.lineStyle(2, 0xf6f6f6, 1);
+            planet04.drawCircle(0, 0, 10);
+            planet04.pivot.x = 50;
+            planet04.pivot.y = 50;
+            sp_planet04.addChild(planet04);
+            sp_planet04.anchor.set(0.5);
+            circleLayer.addChild(sp_planet04);
+        }
+
+        function animatePlanets() {
+            posGraph = getRadPosition(app.screen.width / 2, app.screen.height / 2, orbitDeg, 10);
+            sp_orbit.position.set(posGraph.x, posGraph.y);
+
+            orbitCenter = posGraph;
+            posGraph = getRadPosition(orbitCenter.x, orbitCenter.y, planet01Deg, 200);
+            sp_planet01.position.set(posGraph.x, posGraph.y);
+
+            posGraph = getRadPosition(orbitCenter.x, orbitCenter.y, planet02Deg, 200);
+            sp_planet02.position.set(posGraph.x, posGraph.y);
+
+            posGraph = getRadPosition(orbitCenter.x, orbitCenter.y, planet03Deg, 200);
+            sp_planet03.position.set(posGraph.x, posGraph.y);
+
+            posGraph = getRadPosition(orbitCenter.x, orbitCenter.y, planet04Deg, 200);
+            sp_planet04.position.set(posGraph.x, posGraph.y);
+        }
+
+        function menuTexts() {
             // text_blogs = new Sprite(resources.text_blog.texture);
             text_blogs = new PIXI.Text('Blogs', style);
             text_dusun = new PIXI.Text('Dusun', style);
-            text_profile = new PIXI.Text('GitHub', style);
-            text_about = new PIXI.Text('Twitter', style);
+            text_git = new PIXI.Text('GitHub', style);
+            text_twitter = new PIXI.Text('Twitter', style);
+            text_about = new PIXI.Text('2020|Abe', styleSmall);
+            text_title = new PIXI.Text('Abe\'s Pfolio: \n caution! \n experiments ahead..', styleMessage);
+
+            if (app.screen.width > 700) {
+                text_title.position.set(app.screen.width / 2 - 350, app.screen.height / 2 - 90);
+                app.stage.addChild(text_title);
+            } else {
+                text_title.position.set(app.screen.width / 2 - 90, app.screen.height / 2 - 350);
+                app.stage.addChild(text_title);
+            }
+
+            text_about.anchor.set(0.5);
+            text_about.position.set(app.screen.width / 2, app.screen.height / 2 + 110);
+            app.stage.addChild(text_about);
 
             text_blogs.interactive = true;
             text_blogs.buttonMode = true;
@@ -134,29 +271,29 @@ $(document).ready(function () {
             text_dusun.interactive = true;
             text_dusun.buttonMode = true;
             text_dusun
-                .on('pointerover', onButtonOver)
+                .on('pointerover', onButtonOverCS)
                 .on('pointerout', onButtonOut)
                 .on('pointerdown', gotoDusun);
             text_dusun.anchor.set(0.5);
             app.stage.addChild(text_dusun);
 
-            text_profile.interactive = true;
-            text_profile.buttonMode = true;
-            text_profile
+            text_git.interactive = true;
+            text_git.buttonMode = true;
+            text_git
                 .on('pointerover', onButtonOver)
                 .on('pointerout', onButtonOut)
                 .on('pointerdown', gotoGitHub);
-            text_profile.anchor.set(0.5);
-            app.stage.addChild(text_profile);
+            text_git.anchor.set(0.5);
+            app.stage.addChild(text_git);
 
-            text_about.interactive = true;
-            text_about.buttonMode = true;
-            text_about
+            text_twitter.interactive = true;
+            text_twitter.buttonMode = true;
+            text_twitter
                 .on('pointerover', onButtonOver)
                 .on('pointerout', onButtonOut)
                 .on('pointerdown', gotoTwitter);
-            text_about.anchor.set(0.5);
-            app.stage.addChild(text_about);
+            text_twitter.anchor.set(0.5);
+            app.stage.addChild(text_twitter);
 
             animateTexts();
         }
@@ -198,27 +335,27 @@ $(document).ready(function () {
             text_dusun.position.set(posText.x, posText.y);
             text_dusun.rotation = degToRad(text_dusun_deg);
 
-            posText = getRadPosition(app.screen.width / 2, app.screen.height / 2, text_profile_deg, distance);
-            text_profile.scale.set(Math.abs(text_profile_deg - 180) / 180);
-            text_profile.position.set(posText.x, posText.y);
-            text_profile.rotation = degToRad(text_profile_deg);
+            posText = getRadPosition(app.screen.width / 2, app.screen.height / 2, text_git_deg, distance);
+            text_git.scale.set(Math.abs(text_git_deg - 180) / 180);
+            text_git.position.set(posText.x, posText.y);
+            text_git.rotation = degToRad(text_git_deg);
 
             posText = getRadPosition(app.screen.width / 2, app.screen.height / 2, text_about_deg, distance);
-            text_about.scale.set(Math.abs(text_about_deg - 180) / 180);
-            text_about.position.set(posText.x, posText.y);
-            text_about.rotation = degToRad(text_about_deg);
+            text_twitter.scale.set(Math.abs(text_about_deg - 180) / 180);
+            text_twitter.position.set(posText.x, posText.y);
+            text_twitter.rotation = degToRad(text_about_deg);
         }
 
         $(document).on('mousewheel', function (event) {
             if (event.deltaY == 1) {
                 text_blogs_deg >= 360 ? text_blogs_deg = 0 : text_blogs_deg += rotationRate;
                 text_dusun_deg >= 360 ? text_dusun_deg = 0 : text_dusun_deg += rotationRate;
-                text_profile_deg >= 360 ? text_profile_deg = 0 : text_profile_deg += rotationRate;
+                text_git_deg >= 360 ? text_git_deg = 0 : text_git_deg += rotationRate;
                 text_about_deg >= 360 ? text_about_deg = 0 : text_about_deg += rotationRate;
             } else {
                 text_blogs_deg <= 0 ? text_blogs_deg = 360 : text_blogs_deg -= rotationRate;
                 text_dusun_deg <= 0 ? text_dusun_deg = 360 : text_dusun_deg -= rotationRate;
-                text_profile_deg <= 0 ? text_profile_deg = 360 : text_profile_deg -= rotationRate;
+                text_git_deg <= 0 ? text_git_deg = 360 : text_git_deg -= rotationRate;
                 text_about_deg <= 0 ? text_about_deg = 360 : text_about_deg -= rotationRate;
             }
             animateTexts();
@@ -245,24 +382,38 @@ $(document).ready(function () {
         }
 
         function onButtonOver() {
+            oldText = this.text;
             this.isOver = true;
             this.style = styleOver;
             this.dirty = true;
         }
 
+        function onButtonOverCS() {
+            oldText = this.text;
+            this.isOver = true;
+            this.style = styleMessage;
+            this.text = '[coming soon]';
+            this.dirty = true;
+        }
+
         function onButtonOut() {
+            this.text = oldText;
             this.isOver = false;
             this.style = style;
             this.dirty = true;
         }
 
         function onClick() {
-            console.log("clicked");
             this.tint = Math.random() * 0xFFFFFF;
         }
 
         function gotoBlogs() {
-
+            var win = window.open('http://abraham-kurnanto.com/website', '_blank');
+            if (win) {
+                win.focus();
+            } else {
+                alert('Please allow popups for this website');
+            }
         }
 
         function gotoDusun() {
