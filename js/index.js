@@ -255,12 +255,12 @@ $(document).ready(function () {
     }
 
     function menuTexts() {
-        text_blogs = new PIXI.Text('Blogs', style);
-        text_dusun = new PIXI.Text('Dusun', style);
+        text_blogs = new PIXI.Text('blogs', style);
+        text_dusun = new PIXI.Text('dusun', style);
         text_git = new PIXI.Text('GitHub', style);
         text_twitter = new PIXI.Text('Twitter', style);
         text_about = new PIXI.Text('2020|Abe', styleSmall);
-        text_title = new PIXI.Text('Abe\'s Pfolio: \n caution! \n experiments ahead..', styleMessage);
+        text_title = new PIXI.Text('Abe\'s Pfolio: \n>>caution \nexperiments ahead..', styleMessage);
         text_info = new PIXI.Text('use scroll up/down', styleMessage);
 
         if (app.screen.width > 700) {
