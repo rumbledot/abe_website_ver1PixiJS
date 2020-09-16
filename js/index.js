@@ -10,6 +10,11 @@ let logo,
     oldMouseX, oldMouseY, mouseX, mouseY;
 
 let justLoaded = true;
+let menuOpen = false;
+let floatMenuAlpha = 0;
+
+var width = 1280;
+var height = 720;
 
 let orbitCenter, posGraph;
 let orbitDeg = 225;
@@ -94,6 +99,9 @@ $(document).ready(function () {
     const circleLayer = new PIXI.Container();
     app.stage.addChild(circleLayer);
 
+    const menuLayer = new PIXI.Container();
+    app.stage.addChild(menuLayer);
+
     // Text Styles
     const style = new PIXI.TextStyle({
         fontFamily: 'Courier New',
@@ -125,8 +133,38 @@ $(document).ready(function () {
         wordWrapWidth: 200,
     });
 
+    const styleFloat = new PIXI.TextStyle({
+        fontFamily: 'Courier New',
+        fontSize: 30,
+        fill: ['#000000'],
+        stroke: '#9badb7',
+        strokeThickness: 1,
+        wordWrap: true,
+        wordWrapWidth: 200,
+    });
+
+    const styleFloatOver = new PIXI.TextStyle({
+        fontFamily: 'Courier New',
+        fontSize: 32,
+        fill: ['#000000'],
+        stroke: '#9badb7',
+        strokeThickness: 1,
+        wordWrap: true,
+        wordWrapWidth: 200,
+    });
+
+    const styleFloatSmall = new PIXI.TextStyle({
+        fontFamily: 'Courier New',
+        fontSize: 20,
+        fill: ['#000000'],
+        stroke: '#9badb7',
+        strokeThickness: 1,
+        wordWrap: true,
+        wordWrapWidth: 200,
+    });
+
     const styleOver = new PIXI.TextStyle({
-        fontFamily: 'SummerGarden',
+        fontFamily: 'Tahoma',
         fontSize: 70,
         fill: ['#000000'],
         stroke: '#9badb7',
@@ -159,6 +197,7 @@ $(document).ready(function () {
         planet02Deg += planet02DegFactor;
         planet03Deg += planet03DegFactor;
         planet04Deg += planet04DegFactor;
+        animateFloatMenu();
         animatePlanets();
     });
 
@@ -169,6 +208,9 @@ $(document).ready(function () {
         planets();
         centerLogo();
         menuTexts();
+        floatMenu();
+        var os = navigator.platform;
+        console.log("platform ", os);
     }
 
     function planets() {
@@ -255,6 +297,7 @@ $(document).ready(function () {
     }
 
     function menuTexts() {
+
         text_blogs = new PIXI.Text('blogs', style);
         text_dusun = new PIXI.Text('dusun', style);
         text_git = new PIXI.Text('GitHub', style);
@@ -320,6 +363,71 @@ $(document).ready(function () {
         animateTexts();
     }
 
+    function floatMenu() {
+        app.stage.removeChild(menuLayer);
+        app.stage.addChild(menuLayer);
+
+        text_float_blogs = new PIXI.Text('blogs', styleFloat);
+        text_float_dusun = new PIXI.Text('dusun', styleFloat);
+        text_float_git = new PIXI.Text('GitHub', styleFloat);
+        text_float_twitter = new PIXI.Text('Twitter', styleFloat);
+        text_float_about = new PIXI.Text('2020|Abe', styleFloatSmall);
+
+        text_float_blogs.interactive = true;
+        text_float_blogs.buttonMode = true;
+        text_float_blogs
+            .on('pointerover', onFloatButtonOver)
+            .on('pointerout', onFloatButtonOut)
+            .on('pointerdown', gotoBlogs);
+        text_float_blogs.position.set(70, 120);
+        menuLayer.addChild(text_float_blogs);
+
+        text_float_dusun.interactive = true;
+        text_float_dusun.buttonMode = true;
+        text_float_dusun
+            .on('pointerover', onFloatButtonOver)
+            .on('pointerout', onFloatButtonOut)
+            .on('pointerdown', gotoDusun);
+        text_float_dusun.position.set(70, 150);
+        menuLayer.addChild(text_float_dusun);
+
+        text_float_git.interactive = true;
+        text_float_git.buttonMode = true;
+        text_float_git
+            .on('pointerover', onFloatButtonOver)
+            .on('pointerout', onFloatButtonOut)
+            .on('pointerdown', gotoDusun);
+        text_float_git.position.set(70, 180);
+        menuLayer.addChild(text_float_git);
+
+        text_float_twitter.interactive = true;
+        text_float_twitter.buttonMode = true;
+        text_float_twitter
+            .on('pointerover', onFloatButtonOver)
+            .on('pointerout', onFloatButtonOut)
+            .on('pointerdown', gotoDusun);
+        text_float_twitter.position.set(70, 210);
+        menuLayer.addChild(text_float_twitter);
+
+        text_float_about.position.set(70, 260);
+        menuLayer.addChild(text_float_about);
+
+        menuLayer.visible = menuOpen;
+    }
+
+    function animateFloatMenu() {
+        console.log(floatMenuAlpha, menuOpen);
+        if (menuOpen && (floatMenuAlpha < 1)) {
+            floatMenuAlpha < 1 ? floatMenuAlpha += 0.1 : floatMenuAlpha = 1;
+            menuLayer.alpha = floatMenuAlpha;
+        }
+
+        if (!menuOpen && (floatMenuAlpha > 0)) {
+            floatMenuAlpha = 0;
+            menuLayer.alpha = floatMenuAlpha;
+        }
+    }
+
     function setGrid() {
         app.stage.removeChild(grids);
         app.stage.addChild(grids);
@@ -344,6 +452,16 @@ $(document).ready(function () {
         logo.anchor.set(0.5);
         logo.position.set(app.screen.width / 2, app.screen.height / 2);
         app.stage.addChild(logo);
+
+        logoMenu = new Sprite(resources.logo.texture);
+        logoMenu.scale.set(0.3);
+        logoMenu.anchor.set(0.5);
+        logoMenu.position.set(65, 65);
+        logoMenu.interactive = true;
+        logoMenu.buttonMode = true;
+        logoMenu
+            .on('pointerdown', toggleMenu);
+        app.stage.addChild(logoMenu);
     }
 
     function animateTexts() {
@@ -407,6 +525,30 @@ $(document).ready(function () {
         grid_overlays.position.y = (mY - centerY) / 50;
         grids.position.x = (centerX - mX) / 100;
         grids.position.y = (centerY - mY) / 100;
+    }
+    function onMenuOver() {
+        this.isOver = true;
+        this.scale.set(0.12);
+    }
+
+    function onMenuOut() {
+        this.isOver = false;
+        this.scale.set(0.1);
+    }
+
+    function toggleMenu() {
+        menuOpen = !menuOpen;
+        floatMenu();
+    }
+
+    function onFloatButtonOver() {
+        this.style = styleFloatOver;
+        this.dirty = true;
+    }
+
+    function onFloatButtonOut() {
+        this.style = styleFloat;
+        this.dirty = true;
     }
 
     function pointerDown(event) {
