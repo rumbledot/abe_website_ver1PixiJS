@@ -396,7 +396,7 @@ $(document).ready(function () {
         text_float_git
             .on('pointerover', onFloatButtonOver)
             .on('pointerout', onFloatButtonOut)
-            .on('pointerdown', gotoDusun);
+            .on('pointerdown', gotoGitHub);
         text_float_git.position.set(70, 180);
         menuLayer.addChild(text_float_git);
 
@@ -405,7 +405,7 @@ $(document).ready(function () {
         text_float_twitter
             .on('pointerover', onFloatButtonOver)
             .on('pointerout', onFloatButtonOut)
-            .on('pointerdown', gotoDusun);
+            .on('pointerdown', gotoTwitter);
         text_float_twitter.position.set(70, 210);
         menuLayer.addChild(text_float_twitter);
 
