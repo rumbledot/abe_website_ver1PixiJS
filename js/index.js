@@ -56,6 +56,9 @@ let sp_planet02 = new Sprite();
 let sp_planet03 = new Sprite();
 let sp_planet04 = new Sprite();
 
+var isMobile = isMobile();
+console.log(isMobile);
+
 $(document).ready(function () {
 
     // create PIXI Application
@@ -208,9 +211,7 @@ $(document).ready(function () {
         planets();
         centerLogo();
         menuTexts();
-        floatMenu();
-        var os = navigator.platform;
-        console.log("platform ", os);
+        if (isMobile) { floatMenu(); }
     }
 
     function planets() {
@@ -364,6 +365,19 @@ $(document).ready(function () {
     }
 
     function floatMenu() {
+
+        if (isMobile) {
+            logoMenu = new Sprite(resources.logo.texture);
+            logoMenu.scale.set(0.3);
+            logoMenu.anchor.set(0.5);
+            logoMenu.position.set(65, 65);
+            logoMenu.interactive = true;
+            logoMenu.buttonMode = true;
+            logoMenu
+                .on('pointerdown', toggleMenu);
+            app.stage.addChild(logoMenu);
+        }
+
         app.stage.removeChild(menuLayer);
         app.stage.addChild(menuLayer);
 
@@ -416,7 +430,6 @@ $(document).ready(function () {
     }
 
     function animateFloatMenu() {
-        console.log(floatMenuAlpha, menuOpen);
         if (menuOpen && (floatMenuAlpha < 1)) {
             floatMenuAlpha < 1 ? floatMenuAlpha += 0.1 : floatMenuAlpha = 1;
             menuLayer.alpha = floatMenuAlpha;
@@ -452,16 +465,6 @@ $(document).ready(function () {
         logo.anchor.set(0.5);
         logo.position.set(app.screen.width / 2, app.screen.height / 2);
         app.stage.addChild(logo);
-
-        logoMenu = new Sprite(resources.logo.texture);
-        logoMenu.scale.set(0.3);
-        logoMenu.anchor.set(0.5);
-        logoMenu.position.set(65, 65);
-        logoMenu.interactive = true;
-        logoMenu.buttonMode = true;
-        logoMenu
-            .on('pointerdown', toggleMenu);
-        app.stage.addChild(logoMenu);
     }
 
     function animateTexts() {
@@ -526,6 +529,7 @@ $(document).ready(function () {
         grids.position.x = (centerX - mX) / 100;
         grids.position.y = (centerY - mY) / 100;
     }
+
     function onMenuOver() {
         this.isOver = true;
         this.scale.set(0.12);
