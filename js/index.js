@@ -8,8 +8,6 @@ let Application = PIXI.Application,
 
 let logo,
     oldMouseX, oldMouseY, mouseX, mouseY;
-
-let justLoaded = true;
 let menuOpen = false;
 let floatMenuAlpha = 0;
 
@@ -29,35 +27,26 @@ let planet02DegFactor = 0.5;
 let planet03DegFactor = 0.6;
 let planet04DegFactor = 0.8;
 
-let text_blogs, text_dusun, text_git, text_twitter, text_about, text_title, oldText;
+let text_about;
 
-let text_blogs_deg = 360;
-let text_dusun_deg = 90;
-let text_git_deg = 180;
 let text_about_deg = 270;
-let rotationRate = 20;
 
 let distance = 240;
 let dragging = false;
 
 let orbit = new PIXI.Graphics();
-let elipse01 = new PIXI.Graphics();
-let elipse02 = new PIXI.Graphics();
 let planet01 = new PIXI.Graphics();
 let planet02 = new PIXI.Graphics();
 let planet03 = new PIXI.Graphics();
 let planet04 = new PIXI.Graphics();
 
 let sp_orbit = new Sprite();
-let sp_elipse01 = new Sprite();
-let sp_elipse02 = new Sprite();
 let sp_planet01 = new Sprite();
 let sp_planet02 = new Sprite();
 let sp_planet03 = new Sprite();
 let sp_planet04 = new Sprite();
 
 var isMobile = isMobile();
-console.log(isMobile);
 
 $(document).ready(function () {
 
@@ -106,26 +95,6 @@ $(document).ready(function () {
     app.stage.addChild(menuLayer);
 
     // Text Styles
-    const style = new PIXI.TextStyle({
-        fontFamily: 'Courier New',
-        fontSize: 70,
-        fill: ['#ffffff'],
-        stroke: '#9badb7',
-        strokeThickness: 2,
-        wordWrap: true,
-        wordWrapWidth: 440,
-    });
-
-    const styleMessage = new PIXI.TextStyle({
-        fontFamily: 'Courier New',
-        fontSize: 30,
-        fill: ['#000000'],
-        stroke: '#9badb7',
-        strokeThickness: 1,
-        wordWrap: true,
-        wordWrapWidth: 200,
-    });
-
     const styleSmall = new PIXI.TextStyle({
         fontFamily: 'Courier New',
         fontSize: 20,
@@ -136,107 +105,40 @@ $(document).ready(function () {
         wordWrapWidth: 200,
     });
 
-    const styleFloat = new PIXI.TextStyle({
-        fontFamily: 'Courier New',
-        fontSize: 30,
-        fill: ['#000000'],
-        stroke: '#9badb7',
-        strokeThickness: 1,
-        wordWrap: true,
-        wordWrapWidth: 200,
-    });
-
-    const styleFloatOver = new PIXI.TextStyle({
-        fontFamily: 'Courier New',
-        fontSize: 32,
-        fill: ['#000000'],
-        stroke: '#9badb7',
-        strokeThickness: 1,
-        wordWrap: true,
-        wordWrapWidth: 200,
-    });
-
-    const styleFloatSmall = new PIXI.TextStyle({
-        fontFamily: 'Courier New',
-        fontSize: 20,
-        fill: ['#000000'],
-        stroke: '#9badb7',
-        strokeThickness: 1,
-        wordWrap: true,
-        wordWrapWidth: 200,
-    });
-
-    const styleOver = new PIXI.TextStyle({
-        fontFamily: 'Tahoma',
-        fontSize: 70,
-        fill: ['#000000'],
-        stroke: '#9badb7',
-        strokeThickness: 1,
-        dropShadow: true,
-        dropShadowColor: '#9badb7',
-        dropShadowBlur: 4,
-        dropShadowAngle: Math.PI / 6,
-        dropShadowDistance: 6,
-        wordWrap: true,
-        wordWrapWidth: 440,
-    });
-
     // The Fun Begin here
     function setup() {
-        app.stage.interactive = true;
-        app.stage.on('pointerdown', pointerDown);
-        app.stage.on('pointerup', pointerUp);
-        app.stage.on('pointermove', pointerMove);
-
         window.addEventListener('resize', resize);
-
         resize();
     }
 
     // What make 'em ticks
+    // internal function called on an interval
     app.ticker.add(function (delta) {
         orbitDeg += orbitDegFactor;
         planet01Deg += planet01DegFactor;
         planet02Deg += planet02DegFactor;
         planet03Deg += planet03DegFactor;
         planet04Deg += planet04DegFactor;
-        animateFloatMenu();
         animatePlanets();
     });
 
     // Functions
     function resize() {
-        app.renderer.resize(window.innerWidth, window.innerHeight);
+        if (isMobile) {
+            app.renderer.resize(screen.width, screen.height);
+        }
+        else {
+            app.renderer.resize(window.innerWidth, window.innerHeight);
+        }
         setGrid();
         planets();
         centerLogo();
         menuTexts();
-        if (isMobile) { floatMenu(); }
     }
 
     function planets() {
         app.stage.removeChild(circleLayer);
         app.stage.addChild(circleLayer);
-
-        elipse01.lineStyle(2, 0xf6f6f6, 1);
-        elipse01.drawEllipse(0, 0, 200, 100);
-        elipse01.pivot.x = 0;
-        elipse01.pivot.y = 0;
-        sp_elipse01.addChild(elipse01);
-        sp_elipse01.anchor.set(0.5);
-        posText = getRadPosition(app.screen.width / 2, app.screen.height / 2, 0, distance);
-        sp_elipse01.position.set(posText.x, posText.y);
-        circleLayer.addChild(sp_elipse01);
-
-        elipse02.lineStyle(2, 0xf6f6f6, 1);
-        elipse02.drawEllipse(0, 0, 150, 80);
-        elipse02.pivot.x = 0;
-        elipse02.pivot.y = 0;
-        sp_elipse02.addChild(elipse02);
-        sp_elipse02.anchor.set(0.5);
-        posText = getRadPosition(app.screen.width / 2, app.screen.height / 2, 0, distance);
-        sp_elipse02.position.set(posText.x, posText.y);
-        circleLayer.addChild(sp_elipse02);
 
         orbit.lineStyle(2, 0xf6f6f6, 1);
         orbit.drawCircle(0, 0, 200);
@@ -298,147 +200,11 @@ $(document).ready(function () {
     }
 
     function menuTexts() {
-
-        text_blogs = new PIXI.Text('blogs', style);
-        text_dusun = new PIXI.Text('dusun', style);
-        text_git = new PIXI.Text('GitHub', style);
-        text_twitter = new PIXI.Text('Twitter', style);
         text_about = new PIXI.Text('2020|Abe', styleSmall);
-        text_title = new PIXI.Text('Abe\'s Pfolio: \n>>caution \nexperiments ahead..', styleMessage);
-        text_info = new PIXI.Text('use scroll up/down', styleMessage);
-
-        if (app.screen.width > 700) {
-            text_title.position.set(app.screen.width / 2 - 350, app.screen.height / 2 - 90);
-            app.stage.addChild(text_title);
-        } else {
-            text_title.position.set(app.screen.width / 2 - 90, app.screen.height / 2 - 350);
-            app.stage.addChild(text_title);
-        }
-
-        if (justLoaded) {
-            text_info.anchor.set(0.5);
-            text_info.position.set(app.screen.width / 2, app.screen.height / 2 - 150);
-            app.stage.addChild(text_info);
-        }
 
         text_about.anchor.set(0.5);
         text_about.position.set(app.screen.width / 2, app.screen.height / 2 + 110);
         app.stage.addChild(text_about);
-
-        text_blogs.interactive = true;
-        text_blogs.buttonMode = true;
-        text_blogs
-            .on('pointerover', onButtonOver)
-            .on('pointerout', onButtonOut)
-            .on('pointerdown', gotoBlogs);
-        text_blogs.anchor.set(0.5);
-        app.stage.addChild(text_blogs);
-
-        text_dusun.interactive = true;
-        text_dusun.buttonMode = true;
-        text_dusun
-            .on('pointerover', onButtonOverCS)
-            .on('pointerout', onButtonOut)
-            .on('pointerdown', gotoDusun);
-        text_dusun.anchor.set(0.5);
-        app.stage.addChild(text_dusun);
-
-        text_git.interactive = true;
-        text_git.buttonMode = true;
-        text_git
-            .on('pointerover', onButtonOver)
-            .on('pointerout', onButtonOut)
-            .on('pointerdown', gotoGitHub);
-        text_git.anchor.set(0.5);
-        app.stage.addChild(text_git);
-
-        text_twitter.interactive = true;
-        text_twitter.buttonMode = true;
-        text_twitter
-            .on('pointerover', onButtonOver)
-            .on('pointerout', onButtonOut)
-            .on('pointerdown', gotoTwitter);
-        text_twitter.anchor.set(0.5);
-        app.stage.addChild(text_twitter);
-
-        animateTexts();
-    }
-
-    function floatMenu() {
-
-        if (isMobile) {
-            logoMenu = new Sprite(resources.logo.texture);
-            logoMenu.scale.set(0.3);
-            logoMenu.anchor.set(0.5);
-            logoMenu.position.set(65, 65);
-            logoMenu.interactive = true;
-            logoMenu.buttonMode = true;
-            logoMenu
-                .on('pointerdown', toggleMenu);
-            app.stage.addChild(logoMenu);
-        }
-
-        app.stage.removeChild(menuLayer);
-        app.stage.addChild(menuLayer);
-
-        text_float_blogs = new PIXI.Text('blogs', styleFloat);
-        text_float_dusun = new PIXI.Text('dusun', styleFloat);
-        text_float_git = new PIXI.Text('GitHub', styleFloat);
-        text_float_twitter = new PIXI.Text('Twitter', styleFloat);
-        text_float_about = new PIXI.Text('2020|Abe', styleFloatSmall);
-
-        text_float_blogs.interactive = true;
-        text_float_blogs.buttonMode = true;
-        text_float_blogs
-            .on('pointerover', onFloatButtonOver)
-            .on('pointerout', onFloatButtonOut)
-            .on('pointerdown', gotoBlogs);
-        text_float_blogs.position.set(70, 120);
-        menuLayer.addChild(text_float_blogs);
-
-        text_float_dusun.interactive = true;
-        text_float_dusun.buttonMode = true;
-        text_float_dusun
-            .on('pointerover', onFloatButtonOver)
-            .on('pointerout', onFloatButtonOut)
-            .on('pointerdown', gotoDusun);
-        text_float_dusun.position.set(70, 150);
-        menuLayer.addChild(text_float_dusun);
-
-        text_float_git.interactive = true;
-        text_float_git.buttonMode = true;
-        text_float_git
-            .on('pointerover', onFloatButtonOver)
-            .on('pointerout', onFloatButtonOut)
-            .on('pointerdown', gotoGitHub);
-        text_float_git.position.set(70, 180);
-        menuLayer.addChild(text_float_git);
-
-        text_float_twitter.interactive = true;
-        text_float_twitter.buttonMode = true;
-        text_float_twitter
-            .on('pointerover', onFloatButtonOver)
-            .on('pointerout', onFloatButtonOut)
-            .on('pointerdown', gotoTwitter);
-        text_float_twitter.position.set(70, 210);
-        menuLayer.addChild(text_float_twitter);
-
-        text_float_about.position.set(70, 260);
-        menuLayer.addChild(text_float_about);
-
-        menuLayer.visible = menuOpen;
-    }
-
-    function animateFloatMenu() {
-        if (menuOpen && (floatMenuAlpha < 1)) {
-            floatMenuAlpha < 1 ? floatMenuAlpha += 0.1 : floatMenuAlpha = 1;
-            menuLayer.alpha = floatMenuAlpha;
-        }
-
-        if (!menuOpen && (floatMenuAlpha > 0)) {
-            floatMenuAlpha = 0;
-            menuLayer.alpha = floatMenuAlpha;
-        }
     }
 
     function setGrid() {
@@ -467,58 +233,6 @@ $(document).ready(function () {
         app.stage.addChild(logo);
     }
 
-    function animateTexts() {
-        posText = getRadPosition(app.screen.width / 2, app.screen.height / 2, text_blogs_deg, distance);
-        text_blogs.scale.set(Math.abs(text_blogs_deg - 180) / 180);
-        text_blogs.position.set(posText.x, posText.y);
-        text_blogs.rotation = degToRad(text_blogs_deg);
-
-        posText = getRadPosition(app.screen.width / 2, app.screen.height / 2, text_dusun_deg, distance);
-        text_dusun.scale.set(Math.abs(text_dusun_deg - 180) / 180);
-        text_dusun.position.set(posText.x, posText.y);
-        text_dusun.rotation = degToRad(text_dusun_deg);
-
-        posText = getRadPosition(app.screen.width / 2, app.screen.height / 2, text_git_deg, distance);
-        text_git.scale.set(Math.abs(text_git_deg - 180) / 180);
-        text_git.position.set(posText.x, posText.y);
-        text_git.rotation = degToRad(text_git_deg);
-
-        posText = getRadPosition(app.screen.width / 2, app.screen.height / 2, text_about_deg, distance);
-        text_twitter.scale.set(Math.abs(text_about_deg - 180) / 180);
-        text_twitter.position.set(posText.x, posText.y);
-        text_twitter.rotation = degToRad(text_about_deg);
-    }
-
-    $(document).on('mousewheel', function (event) {
-        if (justLoaded) {
-            justLoaded = false;
-            app.stage.removeChild(text_info);
-        }
-
-        if (event.deltaY == 1) {
-            text_blogs_deg >= 360 ? text_blogs_deg = 0 : text_blogs_deg += rotationRate;
-            text_dusun_deg >= 360 ? text_dusun_deg = 0 : text_dusun_deg += rotationRate;
-            text_git_deg >= 360 ? text_git_deg = 0 : text_git_deg += rotationRate;
-            text_about_deg >= 360 ? text_about_deg = 0 : text_about_deg += rotationRate;
-            orbitDegFactor = 0.5;
-            planet01DegFactor = 0.2;
-            planet02DegFactor = 0.5;
-            planet03DegFactor = 0.6;
-            planet04DegFactor = 0.8;
-        } else {
-            text_blogs_deg <= 0 ? text_blogs_deg = 360 : text_blogs_deg -= rotationRate;
-            text_dusun_deg <= 0 ? text_dusun_deg = 360 : text_dusun_deg -= rotationRate;
-            text_git_deg <= 0 ? text_git_deg = 360 : text_git_deg -= rotationRate;
-            text_about_deg <= 0 ? text_about_deg = 360 : text_about_deg -= rotationRate;
-            orbitDegFactor = -0.5;
-            planet01DegFactor = -0.2;
-            planet02DegFactor = -0.5;
-            planet03DegFactor = -0.6;
-            planet04DegFactor = -0.8;
-        }
-        animateTexts();
-    });
-
     function pointerMove(event) {
         let mX = event.data.global.x;
         let mY = event.data.global.y;
@@ -529,96 +243,4 @@ $(document).ready(function () {
         grids.position.x = (centerX - mX) / 100;
         grids.position.y = (centerY - mY) / 100;
     }
-
-    function onMenuOver() {
-        this.isOver = true;
-        this.scale.set(0.12);
-    }
-
-    function onMenuOut() {
-        this.isOver = false;
-        this.scale.set(0.1);
-    }
-
-    function toggleMenu() {
-        menuOpen = !menuOpen;
-        floatMenu();
-    }
-
-    function onFloatButtonOver() {
-        this.style = styleFloatOver;
-        this.dirty = true;
-    }
-
-    function onFloatButtonOut() {
-        this.style = styleFloat;
-        this.dirty = true;
-    }
-
-    function pointerDown(event) {
-        dragging = true;
-        pointerMove(event);
-    }
-
-    function pointerUp(event) {
-        dragging = false;
-    }
-
-    function onButtonOver() {
-        oldText = this.text;
-        this.isOver = true;
-        this.style = styleOver;
-        this.dirty = true;
-    }
-
-    function onButtonOverCS() {
-        oldText = this.text;
-        this.isOver = true;
-        this.style = styleMessage;
-        this.text = '[coming soon]';
-        this.dirty = true;
-    }
-
-    function onButtonOut() {
-        this.text = oldText;
-        this.isOver = false;
-        this.style = style;
-        this.dirty = true;
-    }
-
-    function onClick() {
-        this.tint = Math.random() * 0xFFFFFF;
-    }
-
-    function gotoBlogs() {
-        var win = window.open('http://abraham-kurnanto.com/website/public', '_blank');
-        if (win) {
-            win.focus();
-        } else {
-            alert('Please allow popups for this website');
-        }
-    }
-
-    function gotoDusun() {
-
-    }
-
-    function gotoGitHub() {
-        var win = window.open('https://github.com/rumbledot', '_blank');
-        if (win) {
-            win.focus();
-        } else {
-            alert('Please allow popups for this website');
-        }
-    }
-
-    function gotoTwitter() {
-        var win = window.open('https://twitter.com/RumbleDot', '_blank');
-        if (win) {
-            win.focus();
-        } else {
-            alert('Please allow popups for this website');
-        }
-    }
-
 });
